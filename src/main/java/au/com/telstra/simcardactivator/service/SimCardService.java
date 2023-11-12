@@ -25,7 +25,11 @@ public class SimCardService {
 
    public SimCard saveSimCard(SimCard simCard){
        Map<String, String> customerSimCardRequestPayload = new HashMap<>();
-       String iccid = UUID.randomUUID().toString();
+       String iccid;
+       if(null != simCard.getIccid())
+           iccid = simCard.getIccid();
+       else
+           iccid = UUID.randomUUID().toString();
        customerSimCardRequestPayload.put("iccid", iccid);
        customerSimCardRequestPayload.put("customerEmail", simCard.getCustomerEmail());
 
