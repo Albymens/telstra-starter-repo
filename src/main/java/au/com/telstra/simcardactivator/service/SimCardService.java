@@ -19,6 +19,7 @@ import java.util.UUID;
 
 @Service
 public class SimCardService {
+    RestTemplate restTemplate = new RestTemplate();
     Logger logger = LoggerFactory.getLogger(SimCardService.class);
     @Autowired
     SimCardRepository simCardRepository;
@@ -35,25 +36,25 @@ public class SimCardService {
 
        String url = "http://localhost:8444/actuate";
 
-       RestTemplate restTemplate = new RestTemplate();
-       HttpEntity entity = new HttpEntity<>(customerSimCardRequestPayload);
+       HttpEntity<Map<String, String>> entity = new HttpEntity<>(customerSimCardRequestPayload);
        try {
            ResponseEntity response = restTemplate.exchange(url, HttpMethod.POST, entity, Map.class);
 
            if(response.getStatusCode().equals(HttpStatus.OK)){
-               Map<String, Object> actuatorResponse = (Map<String, Object>) response.getBody();
+               Map<String, Object> actuatorResponse =  (Map<String, Object>)response.getBody();
               if(null != actuatorResponse && actuatorResponse.containsKey("success")){
                   simCard.setIccid(iccid);
                   simCard.setCustomerEmail(simCard.getCustomerEmail());
                   simCard.setActive((Boolean) actuatorResponse.get("success"));
                   simCardRepository.save(simCard);
                   logger.info("Sim Card saved Successfully");
+                  return  simCardRepository.save(simCard);
               }
            }
        } catch (Exception ex){
            logger.error("Unable to reach Actuator {}", ex.getMessage());
        }
-       return  simCardRepository.save(simCard);
+       return null;
     }
 
     public SimCard getCustomerSimCard(Long simCardId) {
